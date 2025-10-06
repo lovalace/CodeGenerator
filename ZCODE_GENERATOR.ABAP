@@ -270,7 +270,7 @@ APPEND  |                           CHANGING  t_table      = <_table> ).| TO cod
 APPEND  |   _FieldCatalog  = cl_salv_controller_metadata=>get_lvc_fieldcatalog(| TO code_ui.
 APPEND  |                   r_columns      = o_salv->get_columns( )| TO code_ui.
 APPEND  |                   r_aggregations = o_salv->get_aggregations( ) ).| TO code_ui.
-APPEND  |     "Uyarlamadaki Fieldcatalog değişikliklerini uyguluyoruz.| TO code_ui.
+APPEND  |     "Uyarlamadaki Fieldcatalog değişikliklerini uygulıyor.| TO code_ui.
 APPEND  |      "_fieldcatalog =  zcl_sd_config=>set_fieldcatalog( | TO code_ui.
 APPEND  |      "                 fieldcatalog     = _FieldCatalog| TO code_ui.
 APPEND  |      "                "Uyarlamada Fielcatalog adı ne ise o gelecek.| TO code_ui.
@@ -351,3 +351,31 @@ FREE: CODE.
 *WAIT UP TO 2 SECONDS.
 
 *BAPI_CTREQUEST_CREATE
+* Request oluşturma kodu başlangıcı
+DATA: lv_request TYPE trkorr,
+      lv_text TYPE as4text,
+      lv_devclass TYPE devclass,
+      lt_messages TYPE TABLE OF bapiret2,
+      ls_messages TYPE bapiret2.
+
+lv_devclass = p_pack.
+lv_text = |Otomatik oluşturulan request: { p_prog }|.
+
+CALL FUNCTION 'BAPI_CTREQUEST_CREATE'
+  EXPORTING
+    devclass        = lv_devclass
+    request_text    = lv_text
+    request_type    = 'K'
+  IMPORTING
+    request         = lv_request
+  TABLES
+    return          = lt_messages.
+
+IF lv_request IS NOT INITIAL.
+  WRITE: / 'Request başarıyla oluşturuldu:', lv_request.
+ELSE.
+  LOOP AT lt_messages INTO ls_messages.
+    WRITE: / ls_messages-message.
+  ENDLOOP.
+ENDIF.
+* Request oluşturma kodu sonu
